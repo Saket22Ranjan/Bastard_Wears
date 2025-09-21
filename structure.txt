@@ -274,6 +274,11 @@ folder client
         file index.js
       folder OrderSuccess
         file index.js
+      folder Payment
+        file actions.js
+        file constants.js
+        file index.js
+        file reducer.js
       folder Product
         file actions.js
         file Add.js
@@ -362,6 +367,7 @@ folder client
         file _newsletter.scss
         file _order.scss
         file _overrides.scss
+        file _payment.scss
         file _product.scss
         file _radio.scss
         file _review.scss
@@ -410,6 +416,7 @@ folder client
       file chevron-down.svg
       file close.svg
       file favicon.ico
+      file men.jpg
       file placeholder-image.png
       folder products
         file product-1.jpg
@@ -423,7 +430,8 @@ folder client
         file instagram.svg
         file pinterest.svg
         file twitter.svg
-      file test.jpg
+      file unisex.jpg
+      file women.jpg
     file index.html
   file vercel.json
   folder webpack
@@ -436,6 +444,7 @@ file README.md
 folder server
   file .env
   folder config
+    file cashfree.js
     file keys.js
     file passport.js
     file tax.js
@@ -472,6 +481,7 @@ folder server
       file index.js
       file merchant.js
       file order.js
+      file payment.js
       file product.js
       file review.js
       file user.js
@@ -490,4 +500,5 @@ folder server
     file storage.js
     file store.js
     file utils.js
+  file vercel.json
 file structure.txt
