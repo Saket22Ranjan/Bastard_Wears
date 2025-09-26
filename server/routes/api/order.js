@@ -6,7 +6,7 @@ const Mongoose = require('mongoose');
 const Order = require('../../models/order');
 const Cart = require('../../models/cart');
 const Product = require('../../models/product');
-const Address = require('../../models/address'); // Add Address model
+const Address = require('../../models/address');
 const auth = require('../../middleware/auth');
 
 const store = require('../../utils/store');
@@ -16,7 +16,7 @@ const { sendEmail } = require('../../utils/email');
 
 router.post('/add', auth, async (req, res) => {
   try {
-    const { cartId, total, addressId } = req.body; // Add addressId
+    const { cartId, total, addressId } = req.body;
     const userId = req.user._id;
 
     if (!cartId) return res.status(400).json({ error: 'cartId is required' });
@@ -33,7 +33,7 @@ router.post('/add', auth, async (req, res) => {
       cart: cartId,
       user: userId,
       total,
-      address: addressId, // Add address reference
+      address: addressId,
     });
 
     const orderDoc = await order.save();
@@ -51,43 +51,58 @@ router.post('/add', auth, async (req, res) => {
       user: userId,
       total: orderDoc.total,
       products: cartDoc.products,
-      address: address, // Include address in response
+      address: address,
     };
 
-    // 📩 Send email to Admin
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL,
-      subject: `🛒 New Order Received - ${newOrder._id}`,
-      text: `A new order has been placed by user ${req.user.email}.`,
-      html: `
-        <h2>New Order Received</h2>
-        <p><b>Order ID:</b> ${newOrder._id}</p>
-        <p><b>User:</b> ${req.user.email}</p>
-        <p><b>Total:</b> ₹${newOrder.total}</p>
-        <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
-      `,
-    });
-
-    // 📩 Send confirmation email to User
-    await sendEmail({
-      to: req.user.email,
-      subject: `✅ Order Confirmation - ${newOrder._id}`,
-      text: `Your order has been placed successfully!`,
-      html: `
-        <h2>Order Confirmed</h2>
-        <p>Hi ${req.user.name || 'User'},</p>
-        <p>Your order <b>${newOrder._id}</b> has been placed successfully.</p>
-        <p><b>Total:</b> ₹${newOrder.total}</p>
-        <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
-        <p>We'll notify you once it's shipped.</p>
-      `,
-    });
-
+    // 🚀 RESPOND IMMEDIATELY - Don't wait for emails
     res.status(200).json({
       success: true,
       message: 'Your order has been placed successfully!',
       order: newOrder,
     });
+
+    // 📩 Send emails AFTER responding (non-blocking)
+    setImmediate(async () => {
+      try {
+        // Send email to Admin
+        await sendEmail({
+          to: process.env.ADMIN_EMAIL,
+          subject: `🛒 New Order Received - ${newOrder._id}`,
+          text: `A new order has been placed by user ${req.user.email}.`,
+          html: `
+            <h2>New Order Received</h2>
+            <p><b>Order ID:</b> ${newOrder._id}</p>
+            <p><b>User:</b> ${req.user.email}</p>
+            <p><b>Total:</b> ₹${newOrder.total}</p>
+            <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
+          `,
+        });
+        console.log('✅ Admin email sent successfully');
+      } catch (error) {
+        console.error('❌ Failed to send admin email:', error.message);
+      }
+
+      try {
+        // Send confirmation email to User
+        await sendEmail({
+          to: req.user.email,
+          subject: `✅ Order Confirmation - ${newOrder._id}`,
+          text: `Your order has been placed successfully!`,
+          html: `
+            <h2>Order Confirmed</h2>
+            <p>Hi ${req.user.name || 'User'},</p>
+            <p>Your order <b>${newOrder._id}</b> has been placed successfully.</p>
+            <p><b>Total:</b> ₹${newOrder.total}</p>
+            <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
+            <p>We'll notify you once it's shipped.</p>
+          `,
+        });
+        console.log('✅ User confirmation email sent successfully');
+      } catch (error) {
+        console.error('❌ Failed to send user email:', error.message);
+      }
+    });
+
   } catch (error) {
     console.error('Add Order Error:', error);
     res.status(400).json({
@@ -96,7 +111,7 @@ router.post('/add', auth, async (req, res) => {
   }
 });
 
-// search orders api
+// ... rest of your routes remain the same
 router.get('/search', auth, async (req, res) => {
   try {
     const { search } = req.query;
@@ -113,7 +128,7 @@ router.get('/search', auth, async (req, res) => {
       ordersDoc = await Order.find({
         _id: Mongoose.Types.ObjectId(search)
       })
-      .populate('address') // Add address population
+      .populate('address')
       .populate({
         path: 'cart',
         populate: {
@@ -129,7 +144,7 @@ router.get('/search', auth, async (req, res) => {
         _id: Mongoose.Types.ObjectId(search),
         user
       })
-      .populate('address') // Add address population
+      .populate('address')
       .populate({
         path: 'cart',
         populate: {
@@ -150,7 +165,7 @@ router.get('/search', auth, async (req, res) => {
           total: parseFloat(Number(o.total.toFixed(2))),
           created: o.created,
           products: o.cart?.products,
-          address: o.address // Include address
+          address: o.address
         };
       });
 
@@ -171,13 +186,13 @@ router.get('/search', auth, async (req, res) => {
   }
 });
 
-// fetch orders api
+// Rest of routes remain unchanged...
 router.get('/', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const ordersDoc = await Order.find()
       .sort('-created')
-      .populate('address') // Add address population
+      .populate('address')
       .populate({
         path: 'cart',
         populate: {
@@ -207,7 +222,6 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// fetch my orders api
 router.get('/me', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -216,7 +230,7 @@ router.get('/me', auth, async (req, res) => {
 
     const ordersDoc = await Order.find(query)
       .sort('-created')
-      .populate('address') // Add address population
+      .populate('address')
       .populate({
         path: 'cart',
         populate: {
@@ -246,7 +260,6 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// fetch order api
 router.get('/:orderId', auth, async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -255,7 +268,7 @@ router.get('/:orderId', auth, async (req, res) => {
 
     if (req.user.role === ROLES.Admin) {
       orderDoc = await Order.findOne({ _id: orderId })
-        .populate('address') // Add address population
+        .populate('address')
         .populate({
           path: 'cart',
           populate: {
@@ -268,7 +281,7 @@ router.get('/:orderId', auth, async (req, res) => {
     } else {
       const user = req.user._id;
       orderDoc = await Order.findOne({ _id: orderId, user })
-        .populate('address') // Add address population
+        .populate('address')
         .populate({
           path: 'cart',
           populate: {
@@ -293,7 +306,7 @@ router.get('/:orderId', auth, async (req, res) => {
       totalTax: 0,
       products: orderDoc?.cart?.products,
       cartId: orderDoc.cart._id,
-      address: orderDoc.address // Include address
+      address: orderDoc.address
     };
 
     order = store.caculateTaxAmount(order);
@@ -358,7 +371,6 @@ router.put('/status/item/:itemId', auth, async (req, res) => {
         item => item.status === CART_ITEM_STATUS.Cancelled
       );
 
-      // All items are cancelled => Cancel order
       if (cart.products.length === items.length) {
         await Order.deleteOne({ _id: orderId });
         await Cart.deleteOne({ _id: cartId });
