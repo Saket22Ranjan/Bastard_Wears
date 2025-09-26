@@ -25,6 +25,32 @@ const EditAddress = props => {
     <div className='edit-address'>
       <form onSubmit={handleSubmit} noValidate>
         <Row>
+          <Col xs='12' md='6'>
+            <Input
+              type={'text'}
+              error={formErrors['name']}
+              label={'Full Name'}
+              name={'name'}
+              placeholder={'Enter full name'}
+              value={address.name}
+              onInputChange={(name, value) => {
+                addressChange(name, value);
+              }}
+            />
+          </Col>
+          <Col xs='12' md='6'>
+            <Input
+              type={'tel'}
+              error={formErrors['phoneNumber']}
+              label={'Phone Number'}
+              name={'phoneNumber'}
+              placeholder={'Enter phone number'}
+              value={address.phoneNumber}
+              onInputChange={(name, value) => {
+                addressChange(name, value);
+              }}
+            />
+          </Col>
           <Col xs='12' md='12'>
             <Input
               type={'text'}

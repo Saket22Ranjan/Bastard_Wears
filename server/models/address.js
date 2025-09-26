@@ -7,20 +7,37 @@ const AddressSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 50
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+    trim: true,
+    match: [/^[\d\s\+\-\(\)]+$/, 'Please enter a valid phone number']
+  },
   address: {
-    type: String
+    type: String,
+    required: true
   },
   city: {
-    type: String
+    type: String,
+    required: true
   },
   state: {
-    type: String
+    type: String,
+    required: true
   },
   country: {
-    type: String
+    type: String,
+    required: true
   },
   zipCode: {
-    type: String
+    type: String,
+    required: true
   },
   isDefault: {
     type: Boolean,
@@ -32,6 +49,5 @@ const AddressSchema = new Schema({
     default: Date.now
   }
 });
-
 
 module.exports = Mongoose.model('Address', AddressSchema);

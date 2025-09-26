@@ -14,6 +14,18 @@ import AddAddress from '../../components/Manager/AddAddress';
 import SubPage from '../../components/Manager/SubPage';
 
 class Add extends React.PureComponent {
+  componentDidMount() {
+    // Initialize form data with empty values including name and phoneNumber
+    this.props.addressChange('name', '');
+    this.props.addressChange('phoneNumber', '');
+    this.props.addressChange('address', '');
+    this.props.addressChange('city', '');
+    this.props.addressChange('state', '');
+    this.props.addressChange('country', '');
+    this.props.addressChange('zipCode', '');
+    this.props.addressChange('isDefault', false);
+  }
+
   render() {
     const {
       history,

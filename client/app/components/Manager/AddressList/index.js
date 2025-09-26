@@ -5,43 +5,41 @@
  */
 
 import React from 'react';
-
 import { Link } from 'react-router-dom';
-
-import { AddressIcon, CheckIcon } from '../../Common/Icon';
 
 const AddressList = props => {
   const { addresses } = props;
 
   return (
-    <div className='a-list'>
+    <div className='address-list'>
       {addresses.map((address, index) => (
-        <Link
-          to={`/dashboard/address/edit/${address._id}`}
-          key={index}
-          className='d-block'
-        >
-          <div className='d-flex align-items-center mb-3 address-box'>
-            <div className='mx-3'>
-              <AddressIcon />
-            </div>
-            <div className='flex-1 p-3 p-lg-4'>
-              {address.isDefault ? (
-                <div className='d-flex align-items-center justify-content-between mb-2'>
-                  <h4 className='mb-0 mr-2 one-line-ellipsis'>
-                    Default Delivery Address
-                  </h4>
-                  <CheckIcon className='text-green' />
-                </div>
-              ) : (
-                <h4 className='mb-0'>Delivery Address</h4>
-              )}
-              <p className='mb-2 address-desc'>
-                {`${address?.address} ${address?.city}, ${address?.country}, ${address?.zipCode}`}
+        <div key={address._id} className='address-item border rounded p-3 mb-3'>
+          <div className='d-flex justify-content-between align-items-start'>
+            <div className='address-details'>
+              <h6 className='mb-2'>
+                {address.name}
+                {address.isDefault && (
+                  <span className='badge badge-primary ml-2'>Default</span>
+                )}
+              </h6>
+              <p className='mb-1 text-muted'>
+                <strong>Phone:</strong> {address.phoneNumber}
+              </p>
+              <p className='mb-1'>{address.address}</p>
+              <p className='mb-0 text-muted'>
+                {address.city}, {address.state}, {address.country} - {address.zipCode}
               </p>
             </div>
+            <div className='address-actions'>
+              <Link
+                to={`/dashboard/address/edit/${address._id}`}
+                className='btn btn-sm btn-outline-primary'
+              >
+                Edit
+              </Link>
+            </div>
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   );

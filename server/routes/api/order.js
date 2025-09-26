@@ -54,55 +54,44 @@ router.post('/add', auth, async (req, res) => {
       address: address,
     };
 
-    // 🚀 RESPOND IMMEDIATELY - Don't wait for emails
+    // Send email to Admin
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL,
+      subject: `New Order Received - ${newOrder._id}`,
+      text: `A new order has been placed by user ${req.user.email}.`,
+      html: `
+        <h2>New Order Received</h2>
+        <p><b>Order ID:</b> ${newOrder._id}</p>
+        <p><b>User:</b> ${req.user.email}</p>
+        <p><b>Total:</b> ₹${newOrder.total}</p>
+        <p><b>Delivery To:</b> ${address.name}</p>
+        <p><b>Phone:</b> ${address.phoneNumber}</p>
+        <p><b>Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
+      `,
+    });
+
+    // Send confirmation email to User
+    await sendEmail({
+      to: req.user.email,
+      subject: `Order Confirmation - ${newOrder._id}`,
+      text: `Your order has been placed successfully!`,
+      html: `
+        <h2>Order Confirmed</h2>
+        <p>Hi ${req.user.name || 'User'},</p>
+        <p>Your order <b>${newOrder._id}</b> has been placed successfully.</p>
+        <p><b>Total:</b> ₹${newOrder.total}</p>
+        <p><b>Delivery To:</b> ${address.name}</p>
+        <p><b>Phone:</b> ${address.phoneNumber}</p>
+        <p><b>Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
+        <p>We'll notify you once it's shipped.</p>
+      `,
+    });
+
     res.status(200).json({
       success: true,
       message: 'Your order has been placed successfully!',
       order: newOrder,
     });
-
-    // 📩 Send emails AFTER responding (non-blocking)
-    setImmediate(async () => {
-      try {
-        // Send email to Admin
-        await sendEmail({
-          to: process.env.ADMIN_EMAIL,
-          subject: `🛒 New Order Received - ${newOrder._id}`,
-          text: `A new order has been placed by user ${req.user.email}.`,
-          html: `
-            <h2>New Order Received</h2>
-            <p><b>Order ID:</b> ${newOrder._id}</p>
-            <p><b>User:</b> ${req.user.email}</p>
-            <p><b>Total:</b> ₹${newOrder.total}</p>
-            <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
-          `,
-        });
-        console.log('✅ Admin email sent successfully');
-      } catch (error) {
-        console.error('❌ Failed to send admin email:', error.message);
-      }
-
-      try {
-        // Send confirmation email to User
-        await sendEmail({
-          to: req.user.email,
-          subject: `✅ Order Confirmation - ${newOrder._id}`,
-          text: `Your order has been placed successfully!`,
-          html: `
-            <h2>Order Confirmed</h2>
-            <p>Hi ${req.user.name || 'User'},</p>
-            <p>Your order <b>${newOrder._id}</b> has been placed successfully.</p>
-            <p><b>Total:</b> ₹${newOrder.total}</p>
-            <p><b>Delivery Address:</b> ${address.address}, ${address.city}, ${address.state} ${address.zipCode}</p>
-            <p>We'll notify you once it's shipped.</p>
-          `,
-        });
-        console.log('✅ User confirmation email sent successfully');
-      } catch (error) {
-        console.error('❌ Failed to send user email:', error.message);
-      }
-    });
-
   } catch (error) {
     console.error('Add Order Error:', error);
     res.status(400).json({
@@ -111,7 +100,7 @@ router.post('/add', auth, async (req, res) => {
   }
 });
 
-// ... rest of your routes remain the same
+// search orders api
 router.get('/search', auth, async (req, res) => {
   try {
     const { search } = req.query;
@@ -180,13 +169,14 @@ router.get('/search', auth, async (req, res) => {
       });
     }
   } catch (error) {
+    console.error('Search Orders Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
   }
 });
 
-// Rest of routes remain unchanged...
+// fetch orders api
 router.get('/', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -216,12 +206,14 @@ router.get('/', auth, async (req, res) => {
       count
     });
   } catch (error) {
+    console.error('Fetch Orders Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
   }
 });
 
+// fetch my orders api
 router.get('/me', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -254,12 +246,14 @@ router.get('/me', auth, async (req, res) => {
       count
     });
   } catch (error) {
+    console.error('Fetch My Orders Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
   }
 });
 
+// fetch order api
 router.get('/:orderId', auth, async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -315,6 +309,7 @@ router.get('/:orderId', auth, async (req, res) => {
       order
     });
   } catch (error) {
+    console.error('Fetch Order Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
@@ -337,6 +332,7 @@ router.delete('/cancel/:orderId', auth, async (req, res) => {
       success: true
     });
   } catch (error) {
+    console.error('Cancel Order Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
@@ -371,6 +367,7 @@ router.put('/status/item/:itemId', auth, async (req, res) => {
         item => item.status === CART_ITEM_STATUS.Cancelled
       );
 
+      // All items are cancelled => Cancel order
       if (cart.products.length === items.length) {
         await Order.deleteOne({ _id: orderId });
         await Cart.deleteOne({ _id: cartId });
@@ -395,6 +392,7 @@ router.put('/status/item/:itemId', auth, async (req, res) => {
       message: 'Item status has been updated successfully!'
     });
   } catch (error) {
+    console.error('Update Order Item Status Error:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });

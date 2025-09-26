@@ -147,11 +147,11 @@ class Navigation extends React.PureComponent {
               
               <Col md='4' className='text-center d-none d-md-block'>
                 <i className='fa fa-phone' />
-                <span>Call us 7007722955</span>
+                <span>For Queries bastardwears@gmail.com</span>
               </Col>
               <Col xs='12' className='text-center d-block d-md-none'>
                 <i className='fa fa-phone' />
-                <span> Need advice? Call us 7007722955</span>
+                {/* <span> Need advice? Call us 7007722955</span> */}
               </Col>
             </Row>
           </Container>
