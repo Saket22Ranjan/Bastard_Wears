@@ -84,7 +84,7 @@ const OrderList = props => {
                 <div className='order-summary'>
                   <h5 className='order-total mb-2'>₹{order.total}</h5>
                   <Link
-                    to={`/dashboard/order/${order._id}`}
+                    to={`/order/${order._id}`}
                     className='btn btn-outline-primary btn-sm'
                   >
                     View Details
