@@ -45,11 +45,13 @@ const initialState = {
     brand: {
       value: 0,
       label: 'No Options Selected'
-    }
+    },
+    sizes: [] // Add sizes array to product form
   },
   isLoading: false,
   productShopData: {
-    quantity: 1
+    quantity: 1,
+    size: null // Add size selection to shop data
   },
   formErrors: {},
   editFormErrors: {},
@@ -92,7 +94,8 @@ const productReducer = (state = initialState, action) => {
         ...state,
         storeProduct: action.payload,
         productShopData: {
-          quantity: 1
+          quantity: 1,
+          size: null // Reset size when fetching new product
         },
         shopFormErrors: {}
       };
@@ -171,7 +174,8 @@ const productReducer = (state = initialState, action) => {
           brand: {
             value: 0,
             label: 'No Options Selected'
-          }
+          },
+          sizes: []
         },
         product: {
           _id: ''
@@ -182,7 +186,8 @@ const productReducer = (state = initialState, action) => {
       return {
         ...state,
         productShopData: {
-          quantity: 1
+          quantity: 1,
+          size: null
         },
         shopFormErrors: {}
       };

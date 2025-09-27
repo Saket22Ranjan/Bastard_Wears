@@ -15,6 +15,7 @@ import Input from '../../components/Common/Input';
 import Button from '../../components/Common/Button';
 import LoadingIndicator from '../../components/Common/LoadingIndicator';
 import NotFound from '../../components/Common/NotFound';
+import SelectOption from '../../components/Common/SelectOption';
 import { BagIcon } from '../../components/Common/Icon';
 import ProductReviews from '../../components/Store/ProductReviews';
 import SocialShare from '../../components/Store/SocialShare';
@@ -37,6 +38,18 @@ class ProductPage extends React.PureComponent {
   componentWillUnmount() {
     document.body.classList.remove('product-page');
   }
+
+  // Size options for products
+  getSizeOptions = () => {
+    return [
+      { value: 'XS', label: 'XS' },
+      { value: 'S', label: 'S' },
+      { value: 'M', label: 'M' },
+      { value: 'L', label: 'L' },
+      { value: 'XL', label: 'XL' },
+      { value: 'XXL', label: 'XXL' }
+    ];
+  };
 
   render() {
     const {
@@ -104,6 +117,18 @@ class ProductPage extends React.PureComponent {
                       <p className='price'>₹{product.price}</p>
                     </div>
                     <div className='item-customize'>
+                      <div className='mb-3'>
+                        <SelectOption
+                          error={shopFormErrors['size']}
+                          label={'Size'}
+                          multi={false}
+                          value={productShopData.size}
+                          options={this.getSizeOptions()}
+                          handleSelectChange={(value) => {
+                            productShopChange('size', value);
+                          }}
+                        />
+                      </div>
                       <Input
                         type={'number'}
                         error={shopFormErrors['quantity']}

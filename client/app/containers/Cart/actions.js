@@ -30,7 +30,18 @@ import { toggleCart } from '../Navigation/actions';
 // Handle Add To Cart
 export const handleAddToCart = product => {
   return (dispatch, getState) => {
-    product.quantity = Number(getState().product.productShopData.quantity);
+    const productShopData = getState().product.productShopData;
+    
+    // Validation for size selection
+    if (!productShopData.size || !productShopData.size.value) {
+      return dispatch({ 
+        type: SET_PRODUCT_SHOP_FORM_ERRORS, 
+        payload: { size: 'Please select a size.' }
+      });
+    }
+
+    product.quantity = Number(productShopData.quantity);
+    product.selectedSize = productShopData.size; // Add selected size to product
     product.totalPrice = product.quantity * product.price;
     product.totalPrice = parseFloat(product.totalPrice.toFixed(2));
     const inventory = getState().product.storeProduct.inventory;
@@ -199,6 +210,7 @@ const getCartItems = cartItems => {
     newItem.price = item.price;
     newItem.taxable = item.taxable;
     newItem.product = item._id;
+    newItem.size = item.selectedSize ? item.selectedSize.value : null; // Add size to cart item
     newCartItems.push(newItem);
   });
 

@@ -40,6 +40,10 @@ const ProductSchema = new Schema({
   price: {
     type: Number
   },
+  sizes: [{
+    type: String,
+    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+  }], // Add sizes array to product model
   taxable: {
     type: Boolean,
     default: false

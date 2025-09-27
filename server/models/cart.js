@@ -11,6 +11,10 @@ const CartItemSchema = new Schema({
     ref: 'Product'
   },
   quantity: Number,
+  size: {
+    type: String,
+    required: true // Make size required for cart items
+  },
   purchasePrice: {
     type: Number,
     default: 0
