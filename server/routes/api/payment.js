@@ -39,7 +39,7 @@ router.post('/create-session', auth, async (req, res) => {
                 customer_id: user._id.toString(),
                 customer_name: `${user.firstName} ${user.lastName}`,
                 customer_email: user.email,
-                customer_phone: user.phoneNumber || '9508279572'
+                customer_phone: user.phoneNumber
             },
             order_meta: {
                 // Use dummy HTTPS URLs for development

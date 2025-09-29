@@ -113,9 +113,9 @@ class Sell extends React.PureComponent {
               <div className="contact-info bg-light p-3 rounded">
                 <h4>Contact Information</h4>
                 <p><strong>Name:</strong> Saket Ranjan</p>
-                <p><strong>Address:</strong> [Your Complete Address], India</p>
+                <p><strong>Address:</strong> GLA University , Mathura, India</p>
                 <p><strong>Phone:</strong> +91-XXXXXXXXXX</p>
-                <p><strong>Email:</strong> support@mernstore.com</p>
+                <p><strong>Email:</strong> bastardwears@gmail.com</p>
                 <p><strong>Business Hours:</strong> Monday to Sunday, 10:00 AM to 8:00 PM</p>
               </div>
             </div>
@@ -139,7 +139,7 @@ class Sell extends React.PureComponent {
                   <div className="card h-100">
                     <div className="card-body">
                       <h5 className="card-title">Fashion & Clothing</h5>
-                      <p className="card-text">Trendy clothing, footwear, and accessories for men, women, and kids.</p>
+                      <p className="card-text">Trendy clothing for men and women.</p>
                       <div className="price-tag">Starting from ₹ 599 INR</div>
                       <ul className="list-unstyled">
                         <li>✓ Premium Quality</li>
@@ -234,10 +234,10 @@ class Sell extends React.PureComponent {
               <p>MERN Store shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our services, except as required by Indian law.</p>
               
               <h3>7. Governing Law</h3>
-              <p>These terms are governed by the laws of India. Any disputes will be resolved in the courts of [Your City], India.</p>
+              <p>These terms are governed by the laws of India. Any disputes will be resolved in the courts of Mathura, India.</p>
               
               <h3>8. Contact Information</h3>
-              <p>For questions about these terms, contact us at legal@mernstore.com or +91-XXXXXXXXXX.</p>
+              <p>For questions about these terms, contact us at bastardwears@gmail.com or +91-XXXXXXXXXX.</p>
             </div>
           </TabPane>
 
@@ -312,7 +312,7 @@ class Sell extends React.PureComponent {
               <p>We retain your data for as long as necessary to provide services, comply with legal obligations, and resolve disputes.</p>
               
               <h3>8. Contact Us</h3>
-              <p>For privacy-related queries, contact our Data Protection Officer at privacy@mernstore.com.</p>
+              <p>For privacy-related queries, contact our Data Protection Officer at bastardwears@gmail.com.</p>
             </div>
           </TabPane>
 
