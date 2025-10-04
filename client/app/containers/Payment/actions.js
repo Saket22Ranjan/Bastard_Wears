@@ -13,7 +13,8 @@ import {
   PAYMENT_SUCCESS,
   PAYMENT_ERROR,
   RESET_PAYMENT,
-  SET_PAYMENT_LOADING
+  SET_PAYMENT_LOADING,
+  SET_GATEWAY_LOADING
 } from './constants';
 
 import { API_URL } from '../../constants';
@@ -23,6 +24,13 @@ export const paymentChange = (name, value) => {
   return {
     type: PAYMENT_CHANGE,
     payload: { name, value }
+  };
+};
+
+export const setGatewayLoading = (isLoading) => {
+  return {
+    type: SET_GATEWAY_LOADING,
+    payload: isLoading
   };
 };
 

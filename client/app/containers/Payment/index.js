@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import actions from '../../actions';
 
 import LoadingIndicator from '../../components/Common/LoadingIndicator';
+import PaymentLoading from '../../components/Common/PaymentLoading';
 import NotFound from '../../components/Common/NotFound';
 
 class Payment extends React.PureComponent {
@@ -68,7 +69,7 @@ class Payment extends React.PureComponent {
   };
 
   handlePayment = async () => {
-    const { createPaymentSession } = this.props;
+    const { createPaymentSession, setGatewayLoading } = this.props;
     const { isScriptLoaded } = this.state;
 
     if (!isScriptLoaded) {
@@ -83,6 +84,9 @@ class Payment extends React.PureComponent {
     }
 
     try {
+      // Show gateway loading screen
+      setGatewayLoading(true);
+
       const paymentData = {
         orderAmount: orderData.total,
         orderId: orderData._id,
@@ -107,16 +111,27 @@ class Payment extends React.PureComponent {
 
         cashfree.checkout(checkoutOptions).then((result) => {
           console.log('Payment completed:', result);
+          // Hide loading when modal opens
+          setGatewayLoading(false);
           // Always redirect to success after payment
           this.props.history.push(`/order-success/${orderData._id}`);
         }).catch((error) => {
           console.error('Payment error:', error);
+          // Hide loading on error
+          setGatewayLoading(false);
           // Still redirect to success for testing
           this.props.history.push(`/order-success/${orderData._id}`);
         });
+
+        // Hide loading after a short delay (when modal starts opening)
+        setTimeout(() => {
+          setGatewayLoading(false);
+        }, 2000);
       }
     } catch (error) {
       console.error('Payment initialization failed:', error);
+      // Hide loading on error
+      setGatewayLoading(false);
     }
   };
 
@@ -136,6 +151,9 @@ class Payment extends React.PureComponent {
 
     return (
       <div className='payment-page'>
+        {/* Payment Gateway Loading Screen */}
+        {payment.isGatewayLoading && <PaymentLoading />}
+
         <div className='container'>
           <div className='payment-container'>
             <div className='payment-form'>
@@ -164,9 +182,9 @@ class Payment extends React.PureComponent {
               <button
                 className='btn-primary payment-btn'
                 onClick={this.handlePayment}
-                disabled={payment.isLoading || !isScriptLoaded}
+                disabled={payment.isLoading || payment.isGatewayLoading || !isScriptLoaded}
               >
-                {payment.isLoading ? 'Processing...' : '🔒 Pay Securely'}
+                {payment.isGatewayLoading ? 'Opening Gateway...' : payment.isLoading ? 'Processing...' : '🔒 Pay Securely'}
               </button>
 
               <div className='payment-security'>
