@@ -17,7 +17,8 @@ const Checkout = props => {
     placeOrderWithPayment, 
     selectedAddress,
     addresses,
-    onAddressSelect 
+    onAddressSelect,
+    isOrderProcessing
   } = props;
 
   return (
@@ -70,12 +71,13 @@ const Checkout = props => {
           variant='primary'
           text='Continue shopping'
           onClick={() => handleShopping()}
+          disabled={isOrderProcessing}
         />
         {authenticated ? (
           <Button
             variant='primary'
-            text='Place Order & Pay'
-            // disabled={!selectedAddress}
+            text={isOrderProcessing ? 'Processing...' : 'Place Order & Pay'}
+            disabled={isOrderProcessing}
             onClick={() => placeOrderWithPayment()}
           />
         ) : (

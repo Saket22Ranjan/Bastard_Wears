@@ -10,13 +10,15 @@ import {
   REMOVE_FROM_CART,
   HANDLE_CART_TOTAL,
   SET_CART_ID,
-  CLEAR_CART
+  CLEAR_CART,
+  SET_ORDER_PROCESSING
 } from './constants';
 
 const initialState = {
   cartItems: [],
   cartTotal: 0,
-  cartId: ''
+  cartId: '',
+  isOrderProcessing: false
 };
 
 const cartReducer = (state = initialState, action) => {
@@ -70,7 +72,14 @@ const cartReducer = (state = initialState, action) => {
         ...state,
         cartItems: [],
         cartTotal: 0,
-        cartId: ''
+        cartId: '',
+        isOrderProcessing: false
+      };
+      return newState;
+    case SET_ORDER_PROCESSING:
+      newState = {
+        ...state,
+        isOrderProcessing: action.payload
       };
       return newState;
 

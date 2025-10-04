@@ -10,3 +10,4 @@ export const REMOVE_FROM_CART = 'src/Cart/REMOVE_FROM_CART';
 export const HANDLE_CART_TOTAL = 'src/Cart/HANDLE_CART_TOTAL';
 export const SET_CART_ID = 'src/Cart/SET_CART_ID';
 export const CLEAR_CART = 'src/Cart/CLEAR_CART';
+export const SET_ORDER_PROCESSING = 'src/Cart/SET_ORDER_PROCESSING';

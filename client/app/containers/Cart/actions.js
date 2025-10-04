@@ -14,7 +14,8 @@ import {
   REMOVE_FROM_CART,
   HANDLE_CART_TOTAL,
   SET_CART_ID,
-  CLEAR_CART
+  CLEAR_CART,
+  SET_ORDER_PROCESSING
 } from './constants';
 
 import {
@@ -26,6 +27,14 @@ import { API_URL, CART_ID, CART_ITEMS, CART_TOTAL } from '../../constants';
 import handleError from '../../utils/error';
 import { allFieldsValidation } from '../../utils/validation';
 import { toggleCart } from '../Navigation/actions';
+
+// Set order processing state
+export const setOrderProcessing = (isProcessing) => {
+  return {
+    type: SET_ORDER_PROCESSING,
+    payload: isProcessing
+  };
+};
 
 // Handle Add To Cart
 export const handleAddToCart = product => {
@@ -233,6 +242,9 @@ const calculatePurchaseQuantity = inventory => {
 export const placeOrderWithPayment = () => {
   return async (dispatch, getState) => {
     try {
+      // Show order processing loading
+      dispatch(setOrderProcessing(true));
+      
       const { cart, address } = getState();
       
       // Debug address state
@@ -254,6 +266,7 @@ export const placeOrderWithPayment = () => {
       
       // Show specific error if no address
       if (!selectedAddress || !selectedAddress._id) {
+        dispatch(setOrderProcessing(false));
         const errorOptions = {
           title: 'Address Required',
           message: 'Please add a delivery address before placing the order. Go to Account > Addresses to add one.',
@@ -282,13 +295,20 @@ export const placeOrderWithPayment = () => {
         dispatch(clearCart());
         dispatch(toggleCart());
         
+        // Navigate to payment page
         dispatch(push({
           pathname: '/payment',
           state: { order }
         }));
+        
+        // Hide loading after navigation
+        dispatch(setOrderProcessing(false));
       }
     } catch (error) {
       console.error('Order creation failed:', error);
+      
+      // Hide loading on error
+      dispatch(setOrderProcessing(false));
       
       // Show more specific error message
       const errorMsg = error.response?.data?.error || 'Order creation failed';

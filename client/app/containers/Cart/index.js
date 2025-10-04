@@ -12,6 +12,7 @@ import actions from '../../actions';
 import CartList from '../../components/Store/CartList';
 import CartSummary from '../../components/Store/CartSummary';
 import Checkout from '../../components/Store/Checkout';
+import OrderProcessingLoading from '../../components/Common/OrderProcessingLoading';
 import { BagIcon, CloseIcon } from '../../components/Common/Icon';
 import Button from '../../components/Common/Button';
 
@@ -26,12 +27,16 @@ class Cart extends React.PureComponent {
       handleCheckout,
       handleRemoveFromCart,
       placeOrder,
-      placeOrderWithPayment,  // ADD THIS LINE
-      authenticated
+      placeOrderWithPayment,
+      authenticated,
+      isOrderProcessing
     } = this.props;
 
     return (
       <div className='cart'>
+        {/* Order Processing Loading Screen */}
+        {isOrderProcessing && <OrderProcessingLoading />}
+        
         <div className='cart-header'>
           {isCartOpen && (
             <Button
@@ -64,8 +69,9 @@ class Cart extends React.PureComponent {
               handleShopping={handleShopping}
               handleCheckout={handleCheckout}
               placeOrder={placeOrder}
-              placeOrderWithPayment={placeOrderWithPayment}  // ADD THIS LINE
+              placeOrderWithPayment={placeOrderWithPayment}
               authenticated={authenticated}
+              isOrderProcessing={isOrderProcessing}
             />
           </div>
         )}
@@ -79,7 +85,8 @@ const mapStateToProps = state => {
     isCartOpen: state.navigation.isCartOpen,
     cartItems: state.cart.cartItems,
     cartTotal: state.cart.cartTotal,
-    authenticated: state.authentication.authenticated
+    authenticated: state.authentication.authenticated,
+    isOrderProcessing: state.cart.isOrderProcessing
   };
 };
 
