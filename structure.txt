@@ -33,9 +33,13 @@ folder client
           file index.js
         folder NotFound
           file index.js
+        folder OrderProcessingLoading
+          file index.js
         folder Page404
           file index.js
         folder Pagination
+          file index.js
+        folder PaymentLoading
           file index.js
         folder Popover
           file index.js

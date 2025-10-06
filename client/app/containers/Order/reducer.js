@@ -1,6 +1,6 @@
 /*
  *
- * Order reducer with address support
+ * Order reducer
  *
  */
 
@@ -24,9 +24,10 @@ const initialState = {
     totalTax: 0,
     total: 0,
     status: '',
-    address: null, // Added address field
-    user: null,    // Added user field for additional context
-    created: null  // Added created date field
+    address: null,
+    user: null,
+    created: null,
+    paymentStatus: 'Pending'
   },
   isLoading: false,
   advancedFilters: {
@@ -39,24 +40,45 @@ const initialState = {
 const orderReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_ORDERS:
+      // Filter out orders with all cancelled items on the client side as well
+      const validOrders = action.payload.filter(order => {
+        if (!order.products || order.products.length === 0) {
+          return false;
+        }
+        const allCancelled = order.products.every(p => p.status === 'Cancelled');
+        return !allCancelled;
+      });
+      
       return {
         ...state,
-        orders: action.payload
+        orders: validOrders
       };
+      
     case FETCH_SEARCHED_ORDERS:
+      // Filter searched orders as well
+      const validSearchedOrders = action.payload.filter(order => {
+        if (!order.products || order.products.length === 0) {
+          return false;
+        }
+        const allCancelled = order.products.every(p => p.status === 'Cancelled');
+        return !allCancelled;
+      });
+      
       return {
         ...state,
-        searchedOrders: action.payload
+        searchedOrders: validSearchedOrders
       };
+      
     case FETCH_ORDER:
       return {
         ...state,
         order: {
           ...action.payload,
-          // Ensure address is properly structured
-          address: action.payload.address || null
+          address: action.payload.address || null,
+          paymentStatus: action.payload.paymentStatus || 'Pending'
         }
       };
+      
     case SET_ADVANCED_FILTERS:
       return {
         ...state,
@@ -65,6 +87,7 @@ const orderReducer = (state = initialState, action) => {
           ...action.payload
         }
       };
+      
     case UPDATE_ORDER_STATUS:
       const itemIndex = state.order.products.findIndex(
         item => item._id === action.payload.itemId
@@ -72,6 +95,7 @@ const orderReducer = (state = initialState, action) => {
 
       const newProducts = [...state.order.products];
       newProducts[itemIndex].status = action.payload.status;
+      
       return {
         ...state,
         order: {
@@ -79,16 +103,20 @@ const orderReducer = (state = initialState, action) => {
           products: newProducts
         }
       };
+      
     case SET_ORDERS_LOADING:
       return {
         ...state,
         isLoading: action.payload
       };
+      
     case CLEAR_ORDERS:
       return {
         ...state,
-        orders: []
+        orders: [],
+        searchedOrders: []
       };
+      
     default:
       return state;
   }

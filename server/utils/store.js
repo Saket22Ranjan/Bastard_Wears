@@ -14,7 +14,6 @@ exports.disableProducts = products => {
   Product.bulkWrite(bulkOptions);
 };
 
-// calculate order tax amount
 exports.caculateTaxAmount = order => {
   try {
     const taxRate = taxConfig.stateTaxRate;
@@ -80,7 +79,6 @@ exports.caculateOrderTotal = order => {
   return total;
 };
 
-// calculate order tax amount
 exports.caculateItemsSalesTax = items => {
   const taxRate = taxConfig.stateTaxRate;
 
@@ -110,15 +108,24 @@ exports.caculateItemsSalesTax = items => {
 };
 
 exports.formatOrders = orders => {
-  const newOrders = orders.map(o => {
-    return {
-      _id: o._id,
-      total: parseFloat(Number(o.total.toFixed(2))),
-      created: o.created,
-      products: o.cart?.products || [],
-      address: o.address || null // Include address in formatted orders
-    };
-  });
+  const newOrders = orders
+    .filter(o => {
+      // Filter out orders without cart or products
+      if (!o.cart || !o.cart.products || o.cart.products.length === 0) {
+        return false;
+      }
+      return true;
+    })
+    .map(o => {
+      return {
+        _id: o._id,
+        total: parseFloat(Number(o.total.toFixed(2))),
+        created: o.created,
+        products: o.cart?.products || [],
+        address: o.address || null,
+        paymentStatus: o.paymentStatus || 'Pending'
+      };
+    });
 
   let formattedOrders = newOrders.map(o =>
     o?.products ? this.caculateTaxAmount(o) : o
@@ -126,4 +133,3 @@ exports.formatOrders = orders => {
 
   return formattedOrders.sort((a, b) => b.created - a.created);
 };
-

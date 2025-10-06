@@ -23,7 +23,6 @@ router.post('/add', auth, async (req, res) => {
     if (!total) return res.status(400).json({ error: 'total is required' });
     if (!addressId) return res.status(400).json({ error: 'addressId is required' });
 
-    // Verify address belongs to user
     const address = await Address.findOne({ _id: addressId, user: userId });
     if (!address) {
       return res.status(400).json({ error: 'Invalid address selected' });
@@ -54,7 +53,6 @@ router.post('/add', auth, async (req, res) => {
       address: address,
     };
 
-    // Send email to Admin
     await sendEmail({
       to: process.env.ADMIN_EMAIL,
       subject: `New Order Received - ${newOrder._id}`,
@@ -70,7 +68,6 @@ router.post('/add', auth, async (req, res) => {
       `,
     });
 
-    // Send confirmation email to User
     await sendEmail({
       to: req.user.email,
       subject: `Order Confirmation - ${newOrder._id}`,
@@ -100,15 +97,12 @@ router.post('/add', auth, async (req, res) => {
   }
 });
 
-// search orders api
 router.get('/search', auth, async (req, res) => {
   try {
     const { search } = req.query;
 
     if (!Mongoose.Types.ObjectId.isValid(search)) {
-      return res.status(200).json({
-        orders: []
-      });
+      return res.status(200).json({ orders: [] });
     }
 
     let ordersDoc = null;
@@ -122,9 +116,7 @@ router.get('/search', auth, async (req, res) => {
         path: 'cart',
         populate: {
           path: 'products.product',
-          populate: {
-            path: 'brand'
-          }
+          populate: { path: 'brand' }
         }
       });
     } else {
@@ -138,14 +130,20 @@ router.get('/search', auth, async (req, res) => {
         path: 'cart',
         populate: {
           path: 'products.product',
-          populate: {
-            path: 'brand'
-          }
+          populate: { path: 'brand' }
         }
       });
     }
 
-    ordersDoc = ordersDoc.filter(order => order.cart);
+    ordersDoc = ordersDoc.filter(order => {
+      if (!order.cart || !order.cart.products || order.cart.products.length === 0) {
+        return false;
+      }
+      const allCancelled = order.cart.products.every(
+        item => item.status === CART_ITEM_STATUS.Cancelled
+      );
+      return !allCancelled;
+    });
 
     if (ordersDoc.length > 0) {
       const newOrders = ordersDoc.map(o => {
@@ -160,13 +158,9 @@ router.get('/search', auth, async (req, res) => {
 
       let orders = newOrders.map(o => store.caculateTaxAmount(o));
       orders.sort((a, b) => b.created - a.created);
-      res.status(200).json({
-        orders
-      });
+      res.status(200).json({ orders });
     } else {
-      res.status(200).json({
-        orders: []
-      });
+      res.status(200).json({ orders: [] });
     }
   } catch (error) {
     console.error('Search Orders Error:', error);
@@ -176,34 +170,52 @@ router.get('/search', auth, async (req, res) => {
   }
 });
 
-// fetch orders api
 router.get('/', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const ordersDoc = await Order.find()
+    
+    let ordersDoc = await Order.find()
       .sort('-created')
       .populate('address')
       .populate({
         path: 'cart',
         populate: {
           path: 'products.product',
-          populate: {
-            path: 'brand'
-          }
+          populate: { path: 'brand' }
         }
       })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
 
-    const count = await Order.countDocuments();
+    ordersDoc = ordersDoc.filter(order => {
+      if (!order.cart || !order.cart.products || order.cart.products.length === 0) {
+        return false;
+      }
+      const allCancelled = order.cart.products.every(
+        item => item.status === CART_ITEM_STATUS.Cancelled
+      );
+      return !allCancelled;
+    });
+
+    const allOrders = await Order.find().populate('cart');
+    const validOrdersCount = allOrders.filter(order => {
+      if (!order.cart || !order.cart.products || order.cart.products.length === 0) {
+        return false;
+      }
+      const allCancelled = order.cart.products.every(
+        item => item.status === CART_ITEM_STATUS.Cancelled
+      );
+      return !allCancelled;
+    }).length;
+
     const orders = store.formatOrders(ordersDoc);
 
     res.status(200).json({
       orders,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil(validOrdersCount / limit),
       currentPage: Number(page),
-      count
+      count: validOrdersCount
     });
   } catch (error) {
     console.error('Fetch Orders Error:', error);
@@ -213,37 +225,54 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// fetch my orders api
 router.get('/me', auth, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const user = req.user._id;
     const query = { user };
 
-    const ordersDoc = await Order.find(query)
+    let ordersDoc = await Order.find(query)
       .sort('-created')
       .populate('address')
       .populate({
         path: 'cart',
         populate: {
           path: 'products.product',
-          populate: {
-            path: 'brand'
-          }
+          populate: { path: 'brand' }
         }
       })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
 
-    const count = await Order.countDocuments(query);
+    ordersDoc = ordersDoc.filter(order => {
+      if (!order.cart || !order.cart.products || order.cart.products.length === 0) {
+        return false;
+      }
+      const allCancelled = order.cart.products.every(
+        item => item.status === CART_ITEM_STATUS.Cancelled
+      );
+      return !allCancelled;
+    });
+
+    const allUserOrders = await Order.find(query).populate('cart');
+    const validOrdersCount = allUserOrders.filter(order => {
+      if (!order.cart || !order.cart.products || order.cart.products.length === 0) {
+        return false;
+      }
+      const allCancelled = order.cart.products.every(
+        item => item.status === CART_ITEM_STATUS.Cancelled
+      );
+      return !allCancelled;
+    }).length;
+
     const orders = store.formatOrders(ordersDoc);
 
     res.status(200).json({
       orders,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil(validOrdersCount / limit),
       currentPage: Number(page),
-      count
+      count: validOrdersCount
     });
   } catch (error) {
     console.error('Fetch My Orders Error:', error);
@@ -253,11 +282,9 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// fetch order api
 router.get('/:orderId', auth, async (req, res) => {
   try {
     const orderId = req.params.orderId;
-
     let orderDoc = null;
 
     if (req.user.role === ROLES.Admin) {
@@ -267,9 +294,7 @@ router.get('/:orderId', auth, async (req, res) => {
           path: 'cart',
           populate: {
             path: 'products.product',
-            populate: {
-              path: 'brand'
-            }
+            populate: { path: 'brand' }
           }
         });
     } else {
@@ -280,9 +305,7 @@ router.get('/:orderId', auth, async (req, res) => {
           path: 'cart',
           populate: {
             path: 'products.product',
-            populate: {
-              path: 'brand'
-            }
+            populate: { path: 'brand' }
           }
         });
     }
@@ -305,9 +328,7 @@ router.get('/:orderId', auth, async (req, res) => {
 
     order = store.caculateTaxAmount(order);
 
-    res.status(200).json({
-      order
-    });
+    res.status(200).json({ order });
   } catch (error) {
     console.error('Fetch Order Error:', error);
     res.status(400).json({
@@ -319,17 +340,26 @@ router.get('/:orderId', auth, async (req, res) => {
 router.delete('/cancel/:orderId', auth, async (req, res) => {
   try {
     const orderId = req.params.orderId;
-
     const order = await Order.findOne({ _id: orderId });
+    
+    if (!order) {
+      return res.status(404).json({
+        error: 'Order not found.'
+      });
+    }
+
     const foundCart = await Cart.findOne({ _id: order.cart });
 
-    increaseQuantity(foundCart.products);
+    if (foundCart) {
+      increaseQuantity(foundCart.products);
+      await Cart.deleteOne({ _id: order.cart });
+    }
 
     await Order.deleteOne({ _id: orderId });
-    await Cart.deleteOne({ _id: order.cart });
 
     res.status(200).json({
-      success: true
+      success: true,
+      message: 'Order has been cancelled successfully.'
     });
   } catch (error) {
     console.error('Cancel Order Error:', error);
@@ -347,13 +377,18 @@ router.put('/status/item/:itemId', auth, async (req, res) => {
     const status = req.body.status || CART_ITEM_STATUS.Cancelled;
 
     const foundCart = await Cart.findOne({ 'products._id': itemId });
+    
+    if (!foundCart) {
+      return res.status(404).json({
+        error: 'Cart not found.'
+      });
+    }
+
     const foundCartProduct = foundCart.products.find(p => p._id == itemId);
 
     await Cart.updateOne(
       { 'products._id': itemId },
-      {
-        'products.$.status': status
-      }
+      { 'products.$.status': status }
     );
 
     if (status === CART_ITEM_STATUS.Cancelled) {
@@ -363,12 +398,11 @@ router.put('/status/item/:itemId', auth, async (req, res) => {
       );
 
       const cart = await Cart.findOne({ _id: cartId });
-      const items = cart.products.filter(
+      const cancelledItems = cart.products.filter(
         item => item.status === CART_ITEM_STATUS.Cancelled
       );
 
-      // All items are cancelled => Cancel order
-      if (cart.products.length === items.length) {
+      if (cart.products.length === cancelledItems.length) {
         await Order.deleteOne({ _id: orderId });
         await Cart.deleteOne({ _id: cartId });
 
@@ -408,7 +442,6 @@ const increaseQuantity = products => {
       }
     };
   });
-
   Product.bulkWrite(bulkOptions);
 };
 

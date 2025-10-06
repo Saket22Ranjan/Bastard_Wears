@@ -5,50 +5,53 @@
  */
 
 import React from 'react';
-
 import { Link } from 'react-router-dom';
-
 import { formatDate } from '../../../utils/date';
 
 const OrderList = props => {
   const { orders } = props;
 
   const renderFirstProduct = order => {
-    if (order?.cart?.products && order.cart.products.length > 0) {
-      const firstProduct = order.cart.products[0];
+    if (order?.products && order.products.length > 0) {
+      const firstProduct = order.products[0];
+      
+      // Skip cancelled items
+      const activeProduct = order.products.find(p => p.status !== 'Cancelled') || firstProduct;
+      
       return (
         <div className='d-flex align-items-center'>
           <img
             className='item-image mr-2'
             src={`${
-              firstProduct.product?.imageUrl
-                ? firstProduct.product?.imageUrl
+              activeProduct.product?.imageUrl
+                ? activeProduct.product?.imageUrl
                 : '/images/placeholder-image.png'
             }`}
+            alt={activeProduct.product?.name || 'Product'}
           />
           <div>
             <Link
-              to={`/product/${firstProduct.product?.slug}`}
+              to={`/product/${activeProduct.product?.slug}`}
               className='item-link'
             >
-              <h5 className='mb-1'>{firstProduct.product?.name}</h5>
+              <h5 className='mb-1'>{activeProduct.product?.name}</h5>
             </Link>
             <div className='d-flex flex-wrap'>
               <small className='text-muted mr-2'>
-                Qty: {firstProduct.quantity}
+                Qty: {activeProduct.quantity}
               </small>
-              {firstProduct.size && (
+              {activeProduct.size && (
                 <small className='text-muted mr-2'>
-                  Size: <span className='font-weight-bold'>{firstProduct.size}</span>
+                  Size: <span className='font-weight-bold'>{activeProduct.size}</span>
                 </small>
               )}
               <small className='text-muted'>
-                ₹{firstProduct.purchasePrice}
+                ₹{activeProduct.purchasePrice}
               </small>
             </div>
-            {order.cart.products.length > 1 && (
+            {order.products.length > 1 && (
               <small className='text-info'>
-                +{order.cart.products.length - 1} more item(s)
+                +{order.products.length - 1} more item(s)
               </small>
             )}
           </div>
@@ -58,9 +61,24 @@ const OrderList = props => {
     return <span>No products</span>;
   };
 
+  // Filter out orders that shouldn't be displayed
+  const validOrders = orders.filter(order => {
+    if (!order.products || order.products.length === 0) {
+      return false;
+    }
+    
+    // Check if all items are cancelled
+    const allCancelled = order.products.every(p => p.status === 'Cancelled');
+    return !allCancelled;
+  });
+
+  if (validOrders.length === 0) {
+    return null;
+  }
+
   return (
     <div className='order-list'>
-      {orders.map((order, index) => (
+      {validOrders.map((order, index) => (
         <div key={`${order._id}-${index}`} className='order-box'>
           <div className='order-details'>
             <div className='row align-items-center'>
@@ -70,7 +88,7 @@ const OrderList = props => {
                     <h6 className='order-id mb-0'>
                       Order #{order._id}
                     </h6>
-                    <span className={`order-status status-${order.paymentStatus?.toLowerCase()}`}>
+                    <span className={`order-status status-${order.paymentStatus?.toLowerCase() || 'pending'}`}>
                       {order.paymentStatus || 'Pending'}
                     </span>
                   </div>

@@ -1,6 +1,6 @@
 /*
  *
- * Order actions with address validation
+ * Order actions
  *
  */
 
@@ -155,6 +155,13 @@ export const cancelOrder = () => {
 
       await axios.delete(`${API_URL}/order/cancel/${order._id}`);
 
+      const successfulOptions = {
+        title: 'Order cancelled successfully',
+        position: 'tr',
+        autoDismiss: 2
+      };
+
+      dispatch(success(successfulOptions));
       dispatch(push(`/dashboard/orders`));
     } catch (error) {
       handleError(error, dispatch);
@@ -196,20 +203,16 @@ export const updateOrderItemStatus = (itemId, status) => {
   };
 };
 
-// Helper function to validate if user has addresses
 export const validateUserAddress = () => {
   return async (dispatch, getState) => {
     try {
-      // Fetch user addresses if not already available
       const addresses = getState().address?.addresses || [];
       
       if (addresses.length === 0) {
-        // Fetch addresses to make sure we have the latest data
         await dispatch(fetchAddresses());
         const updatedAddresses = getState().address?.addresses || [];
         
         if (updatedAddresses.length === 0) {
-          // No addresses found
           const warningOptions = {
             title: 'Address Required',
             message: 'Please add a delivery address before placing your order.',
@@ -222,11 +225,9 @@ export const validateUserAddress = () => {
         }
       }
       
-      // Check if user has a default address or at least one address
       const hasDefaultAddress = addresses.some(addr => addr.isDefault);
       
       if (!hasDefaultAddress && addresses.length > 0) {
-        // User has addresses but no default one
         const warningOptions = {
           title: 'Default Address Required',
           message: 'Please select a default delivery address.',
@@ -253,21 +254,19 @@ export const addOrder = () => {
       const total = getState().cart.cartTotal;
       const addresses = getState().address?.addresses || [];
       
-      // Get the default address or first available address
       const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 
       if (cartId && defaultAddress) {
         const response = await axios.post(`${API_URL}/order/add`, {
           cartId,
           total,
-          addressId: defaultAddress._id, // Send address ID to backend
-          address: defaultAddress        // Send full address object for immediate use
+          addressId: defaultAddress._id,
+          address: defaultAddress
         });
 
         dispatch(push(`/order/success/${response.data.order._id}`));
         dispatch(clearCart());
       } else if (cartId) {
-        // Fallback if no address found (shouldn't happen due to validation)
         const response = await axios.post(`${API_URL}/order/add`, {
           cartId,
           total
@@ -282,7 +281,6 @@ export const addOrder = () => {
   };
 };
 
-// Updated placeOrder with address validation
 export const placeOrder = () => {
   return async (dispatch, getState) => {
     const token = localStorage.getItem('token');
@@ -290,17 +288,13 @@ export const placeOrder = () => {
 
     if (token && cartItems.length > 0) {
       try {
-        // First validate if user has address
         const hasValidAddress = await dispatch(validateUserAddress());
         
         if (hasValidAddress) {
-          // Proceed with order placement
           await Promise.all([dispatch(getCartId())]);
           dispatch(addOrder());
           dispatch(toggleCart());
         }
-        // If address validation fails, the user will be redirected to address page
-        // and cart will remain open
       } catch (error) {
         handleError(error, dispatch);
       }

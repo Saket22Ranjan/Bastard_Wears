@@ -5,9 +5,7 @@
  */
 
 import React from 'react';
-
 import { connect } from 'react-redux';
-
 import actions from '../../actions';
 import { ROLES } from '../../constants';
 import SubPage from '../../components/Manager/SubPage';
@@ -29,6 +27,13 @@ class List extends React.PureComponent {
 
   componentDidMount() {
     this.props.fetchAccountOrders();
+  }
+
+  componentDidUpdate(prevProps) {
+    // Refetch orders when coming back to this page
+    if (this.props.location !== prevProps.location) {
+      this.props.fetchAccountOrders();
+    }
   }
 
   handleOrderSearch = e => {
