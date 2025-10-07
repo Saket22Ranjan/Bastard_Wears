@@ -13,55 +13,26 @@ const Checkout = props => {
     authenticated, 
     handleShopping, 
     handleCheckout, 
-    placeOrder, 
     placeOrderWithPayment, 
-    selectedAddress,
-    addresses,
-    onAddressSelect,
-    isOrderProcessing
+    isOrderProcessing,
+    addresses
   } = props;
 
   return (
     <div className='easy-checkout'>
+      {/* Show address info if user is authenticated */}
       {authenticated && addresses && addresses.length > 0 && (
-        <div className='address-selection mb-4'>
-          <h5>Select Delivery Address</h5>
-          <div className='address-list'>
-            {addresses.map((address, index) => (
-              <div 
-                key={address._id} 
-                className={`address-item p-3 mb-2 border rounded ${
-                  selectedAddress && selectedAddress._id === address._id 
-                    ? 'border-primary bg-light' 
-                    : 'border-secondary'
-                }`}
-                style={{ cursor: 'pointer' }}
-                onClick={() => onAddressSelect && onAddressSelect(address)}
-              >
-                <div className='d-flex justify-content-between align-items-start'>
-                  <div>
-                    <p className='mb-1'><strong>{address.name}</strong></p>
-                    <p className='mb-1 text-muted'>{address.phoneNumber}</p>
-                    <p className='mb-1'>{address.address}</p>
-                    <p className='mb-0 text-muted'>
-                      {address.city}, {address.state}, {address.country} - {address.zipCode}
-                    </p>
-                    {address.isDefault && (
-                      <small className='text-success font-weight-bold'>Default Address</small>
-                    )}
-                  </div>
-                  <div>
-                    <input 
-                      type='radio'
-                      name='selectedAddress'
-                      checked={selectedAddress && selectedAddress._id === address._id}
-                      onChange={() => onAddressSelect && onAddressSelect(address)}
-                      style={{ transform: 'scale(1.2)' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+        <div className='address-info mb-3'>
+          <div className='alert alert-info p-2'>
+            <small>
+              <strong>✓ {addresses.length} Address{addresses.length > 1 ? 'es' : ''} Available</strong>
+              <br />
+              <small className='text-muted'>
+                {addresses.find(a => a.isDefault) 
+                  ? 'Default address will be used' 
+                  : 'First address will be used'}
+              </small>
+            </small>
           </div>
         </div>
       )}
@@ -89,9 +60,20 @@ const Checkout = props => {
         )}
       </div>
 
-      {authenticated && !selectedAddress && addresses && addresses.length > 0 && (
-        <div className='alert alert-warning mt-3'>
-          <small>Please select a delivery address to proceed with the order.</small>
+      {/* Helper text for authenticated users */}
+      {authenticated && (
+        <div className='checkout-helper mt-3'>
+          <small className='text-muted'>
+            {addresses && addresses.length === 0 ? (
+              <span className='text-warning'>
+                ⚠️ You'll be redirected to add an address
+              </span>
+            ) : (
+              <span>
+                💡 Make sure your phone number is updated in Account Details
+              </span>
+            )}
+          </small>
         </div>
       )}
     </div>

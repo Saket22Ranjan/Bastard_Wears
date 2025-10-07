@@ -17,11 +17,20 @@ class Payment extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      isScriptLoaded: false
+      isScriptLoaded: false,
+      validationError: null
     };
   }
 
   componentDidMount() {
+    // Validate before loading script
+    const validationError = this.validatePaymentRequirements();
+    
+    if (validationError) {
+      this.setState({ validationError });
+      return;
+    }
+
     this.loadCashfreeScript();
 
     // Get order from location state or redirect to cart
@@ -33,6 +42,22 @@ class Payment extends React.PureComponent {
   componentWillUnmount() {
     this.props.resetPayment();
   }
+
+  validatePaymentRequirements = () => {
+    const { user } = this.props;
+
+    // Check if phone number exists
+    if (!user || !user.phoneNumber || user.phoneNumber.trim() === '') {
+      // Redirect to account details
+      setTimeout(() => {
+        this.props.history.push('/dashboard/account');
+      }, 2000);
+      
+      return 'Phone number is required for payment. Redirecting to Account Details...';
+    }
+
+    return null;
+  };
 
   getOrderData = () => {
     const { location, order } = this.props;
@@ -64,13 +89,22 @@ class Payment extends React.PureComponent {
     };
     script.onerror = () => {
       console.error('Failed to load Cashfree SDK');
+      this.setState({ 
+        validationError: 'Failed to load payment gateway. Please try again.' 
+      });
     };
     document.head.appendChild(script);
   };
 
   handlePayment = async () => {
-    const { createPaymentSession, setGatewayLoading } = this.props;
+    const { createPaymentSession, setGatewayLoading, user } = this.props;
     const { isScriptLoaded } = this.state;
+
+    // Re-validate phone number before payment
+    if (!user.phoneNumber || user.phoneNumber.trim() === '') {
+      this.props.history.push('/dashboard/account');
+      return;
+    }
 
     if (!isScriptLoaded) {
       console.error('Cashfree SDK not loaded');
@@ -84,7 +118,6 @@ class Payment extends React.PureComponent {
     }
 
     try {
-      // Show gateway loading screen
       setGatewayLoading(true);
 
       const paymentData = {
@@ -111,35 +144,44 @@ class Payment extends React.PureComponent {
 
         cashfree.checkout(checkoutOptions).then((result) => {
           console.log('Payment completed:', result);
-          // Hide loading when modal opens
           setGatewayLoading(false);
-          // Always redirect to success after payment
           this.props.history.push(`/order-success/${orderData._id}`);
         }).catch((error) => {
           console.error('Payment error:', error);
-          // Hide loading on error
           setGatewayLoading(false);
-          // Still redirect to success for testing
           this.props.history.push(`/order-success/${orderData._id}`);
         });
 
-        // Hide loading after a short delay (when modal starts opening)
         setTimeout(() => {
           setGatewayLoading(false);
         }, 2000);
       }
     } catch (error) {
       console.error('Payment initialization failed:', error);
-      // Hide loading on error
       setGatewayLoading(false);
     }
   };
 
-
   render() {
     const { payment, user } = this.props;
-    const { isScriptLoaded } = this.state;
+    const { isScriptLoaded, validationError } = this.state;
     const orderData = this.getOrderData();
+
+    // Show validation error
+    if (validationError) {
+      return (
+        <div className='payment-page'>
+          <div className='container'>
+            <div className='payment-container'>
+              <div className='alert alert-warning mt-5'>
+                <h4>⚠️ Payment Requirements</h4>
+                <p>{validationError}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (!orderData) {
       return <NotFound message='No order found. Please start from cart.' />;
@@ -170,6 +212,12 @@ class Payment extends React.PureComponent {
                     <span>Total Amount:</span>
                     <span><strong>₹{orderData.total}</strong></span>
                   </div>
+                  {user && user.phoneNumber && (
+                    <div className='order-row'>
+                      <span>Contact:</span>
+                      <span>{user.phoneNumber}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

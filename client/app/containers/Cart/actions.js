@@ -50,7 +50,7 @@ export const handleAddToCart = product => {
     }
 
     product.quantity = Number(productShopData.quantity);
-    product.selectedSize = productShopData.size; // Add selected size to product
+    product.selectedSize = productShopData.size;
     product.totalPrice = product.quantity * product.price;
     product.totalPrice = parseFloat(product.totalPrice.toFixed(2));
     const inventory = getState().product.storeProduct.inventory;
@@ -105,7 +105,6 @@ export const handleRemoveFromCart = product => {
       payload: product
     });
     dispatch(calculateCartTotal());
-    // dispatch(toggleCart());
   };
 };
 
@@ -219,7 +218,7 @@ const getCartItems = cartItems => {
     newItem.price = item.price;
     newItem.taxable = item.taxable;
     newItem.product = item._id;
-    newItem.size = item.selectedSize ? item.selectedSize.value : null; // Add size to cart item
+    newItem.size = item.selectedSize ? item.selectedSize.value : null;
     newCartItems.push(newItem);
   });
 
@@ -238,54 +237,71 @@ const calculatePurchaseQuantity = inventory => {
   }
 };
 
-// FINAL VERSION - redirects to payment instead of order success
+// UPDATED: Better validation with redirects
 export const placeOrderWithPayment = () => {
   return async (dispatch, getState) => {
     try {
-      // Show order processing loading
       dispatch(setOrderProcessing(true));
       
-      const { cart, address } = getState();
+      const state = getState();
+      const { cart, address, account } = state;
+      const user = account.user;
       
-      // Debug address state
-      console.log('Address state:', address);
-      
-      if (!cart.cartId) {
-        await dispatch(getCartId());
-      }
-      
-      // Better address validation
-      let selectedAddress = null;
-      
-      if (address.address && address.address._id) {
-        selectedAddress = address.address;
-      } else if (address.addresses && address.addresses.length > 0) {
-        // Use first available address
-        selectedAddress = address.addresses[0];
-      }
-      
-      // Show specific error if no address
-      if (!selectedAddress || !selectedAddress._id) {
+      // 1. VALIDATE PHONE NUMBER FIRST
+      if (!user.phoneNumber || user.phoneNumber.trim() === '') {
         dispatch(setOrderProcessing(false));
+        dispatch(toggleCart());
+        
         const errorOptions = {
-          title: 'Address Required',
-          message: 'Please add a delivery address before placing the order. Go to Account > Addresses to add one.',
+          title: '📞 Phone Number Required',
+          message: 'Please add your phone number in Account Details before placing an order.',
           position: 'tr',
           autoDismiss: 5
         };
         dispatch(success(errorOptions));
+        
+        // Redirect to account details
+        dispatch(push('/dashboard'));
         return;
       }
       
-      console.log('Using address:', selectedAddress);
+      // 2. VALIDATE ADDRESS
+      const addresses = address.addresses || [];
       
+      if (addresses.length === 0) {
+        dispatch(setOrderProcessing(false));
+        dispatch(toggleCart());
+        
+        const errorOptions = {
+          title: '📍 Address Required',
+          message: 'Please add a delivery address before placing an order.',
+          position: 'tr',
+          autoDismiss: 5
+        };
+        dispatch(success(errorOptions));
+        
+        // Redirect to add address page
+        dispatch(push('/dashboard/address/add'));
+        return;
+      }
+      
+      // Use the first address (or default if available)
+      const defaultAddress = addresses.find(addr => addr.isDefault);
+      const selectedAddress = defaultAddress || addresses[0];
+      
+      // 3. CREATE CART ID IF NEEDED
+      if (!cart.cartId) {
+        await dispatch(getCartId());
+      }
+      
+      const updatedCartId = getState().cart.cartId;
+      
+      // 4. CREATE ORDER
       const orderData = {
-        cartId: cart.cartId,
+        cartId: updatedCartId,
         total: cart.cartTotal,
         addressId: selectedAddress._id
       };
-      
-      console.log('Creating order with:', orderData);
       
       const response = await axios.post(`${API_URL}/order/add`, orderData);
       
@@ -301,19 +317,16 @@ export const placeOrderWithPayment = () => {
           state: { order }
         }));
         
-        // Hide loading after navigation
         dispatch(setOrderProcessing(false));
       }
     } catch (error) {
       console.error('Order creation failed:', error);
       
-      // Hide loading on error
       dispatch(setOrderProcessing(false));
       
-      // Show more specific error message
-      const errorMsg = error.response?.data?.error || 'Order creation failed';
+      const errorMsg = error.response?.data?.error || 'Order creation failed. Please try again.';
       const errorOptions = {
-        title: 'Order Failed',
+        title: '❌ Order Failed',
         message: errorMsg,
         position: 'tr',
         autoDismiss: 5
