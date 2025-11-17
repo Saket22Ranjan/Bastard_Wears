@@ -1,0 +1,142 @@
+.product-carousel-section {
+  .carousel-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 1px;
+    color: #000;
+  }
+
+  .carousel-swiper {
+    padding: 1rem 0 3rem;
+
+    .swiper-button-next,
+    .swiper-button-prev {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e0e0;
+
+      &::after {
+        font-size: 16px;
+        font-weight: 900;
+        color: #000;
+      }
+
+      &:hover {
+        background: #000;
+
+        &::after {
+          color: #fff;
+        }
+      }
+    }
+
+    .swiper-button-prev {
+      left: -10px;
+    }
+
+    .swiper-button-next {
+      right: -10px;
+    }
+  }
+
+  .product-card-carousel {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+      .product-image img {
+        transform: scale(1.05);
+      }
+    }
+
+    .product-image {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: #f8f8f8;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .image-placeholder {
+        font-size: 4rem;
+        color: #ddd;
+        font-weight: 700;
+      }
+
+      .rating-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #000;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .product-info {
+      padding: 1rem;
+
+      h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: #000;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .category {
+        font-size: 0.75rem;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+      }
+
+      .price-row {
+        .price {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #000;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .carousel-swiper {
+      .swiper-button-next,
+      .swiper-button-prev {
+        display: none;
+      }
+    }
+  }
+}

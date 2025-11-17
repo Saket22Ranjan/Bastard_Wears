@@ -1,0 +1,352 @@
+.profile-page {
+  min-height: 70vh;
+  padding: 3rem 2rem;
+  background: #f8f8f8;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .profile-header {
+    margin-bottom: 3rem;
+
+    .welcome-section {
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #000;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: #666;
+      }
+    }
+  }
+
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    @media (max-width: 968px) {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+
+      &.orders-card,
+      &.addresses-card {
+        grid-column: span 1;
+      }
+
+      .card-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h2 {
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: #000;
+          margin: 0;
+        }
+
+        .view-all-link {
+          text-decoration: none;
+          color: #667eea;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: transform 0.2s ease;
+
+          &:hover {
+            transform: translateX(5px);
+          }
+        }
+      }
+
+      .card-body {
+        padding: 2rem;
+
+        .info-item {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 1.2rem;
+          background: #f8f8f8;
+          border-radius: 10px;
+          margin-bottom: 1rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .info-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+          }
+
+          .info-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+
+            .label {
+              font-size: 0.85rem;
+              color: #999;
+              font-weight: 500;
+            }
+
+            .value {
+              font-size: 1.05rem;
+              color: #000;
+              font-weight: 600;
+            }
+          }
+        }
+
+        .empty-orders {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+          padding: 3rem 2rem;
+          text-align: center;
+
+          svg {
+            font-size: 4rem;
+            color: #ccc;
+          }
+
+          p {
+            font-size: 1.1rem;
+            color: #999;
+            margin: 0;
+          }
+
+          .shop-now-btn {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+            }
+          }
+        }
+
+        .orders-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.8rem;
+
+          .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.2rem;
+            background: #f8f8f8;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+
+            &:hover {
+              background: #eee;
+              transform: translateX(5px);
+            }
+
+            .order-info {
+              display: flex;
+              flex-direction: column;
+              gap: 0.3rem;
+
+              .order-id {
+                font-weight: 700;
+                color: #000;
+                font-size: 1rem;
+              }
+
+              .order-date {
+                font-size: 0.85rem;
+                color: #666;
+              }
+            }
+
+            .order-details {
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+
+              .order-total {
+                font-weight: 700;
+                color: #000;
+                font-size: 1.1rem;
+              }
+
+              .order-status {
+                padding: 0.4rem 0.8rem;
+                border-radius: 15px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+
+                &.pending {
+                  background: #fff3cd;
+                  color: #856404;
+                }
+
+                &.shipped {
+                  background: #cce5ff;
+                  color: #004085;
+                }
+
+                &.delivered {
+                  background: #d4edda;
+                  color: #155724;
+                }
+
+                &.cancelled {
+                  background: #f8d7da;
+                  color: #721c24;
+                }
+              }
+            }
+          }
+        }
+
+        .addresses-list {
+          margin-bottom: 1.5rem;
+
+          .address-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: #f8f8f8;
+            border-radius: 10px;
+
+            .address-icon {
+              width: 50px;
+              height: 50px;
+              background: linear-gradient(135deg, #667eea, #764ba2);
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #fff;
+              font-size: 1.4rem;
+              flex-shrink: 0;
+            }
+
+            .address-content {
+              h4 {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+                color: #000;
+              }
+
+              p {
+                font-size: 0.95rem;
+                color: #666;
+                line-height: 1.6;
+                margin: 0;
+              }
+            }
+          }
+        }
+
+        .add-address-btn {
+          width: 100%;
+          padding: 1rem;
+          background: #fff;
+          border: 2px dashed #ddd;
+          border-radius: 10px;
+          color: #667eea;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+
+    p {
+      font-size: 1.2rem;
+      color: #999;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: translateY(-3px);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+
+    .profile-header {
+      .welcome-section {
+        h1 {
+          font-size: 2rem;
+        }
+
+        p {
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .profile-grid {
+      .profile-card {
+        .card-body {
+          padding: 1.5rem;
+
+          .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+        }
+      }
+    }
+  }
+}
