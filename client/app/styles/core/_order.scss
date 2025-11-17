@@ -1,0 +1,158 @@
+.order-dashboard {
+  .order-list {
+    .item-image {
+      width: 60px; 
+      height: 60px;
+      object-fit: cover; 
+      border-radius: $border-radius-default;
+      flex-shrink: 0;
+    }
+
+    .item-link h5 {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    small {
+      font-size: 12px;
+    }
+
+    .d-flex.align-items-center {
+      gap: 10px;
+    }
+  }
+}
+
+/* start order success styles */
+.order-success {
+  .order-message {
+    text-align: center;
+  }
+
+  .order-success-actions {
+    text-align: center;
+
+    .btn-link {
+      margin-right: 10px;
+
+      @include media-breakpoint-down(xs) {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  }
+}
+
+/* end order success styles */
+
+/* start order meta styles */
+.order-meta {
+  .title {
+    border-bottom: $border-primary;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    text-transform: capitalize;
+    margin-bottom: 5px;
+  }
+}
+
+/* end order meta styles */
+
+/* start order items styles */
+.order-items {
+  h2 {
+    border-bottom: $border-primary;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  .item {
+    &:last-child {
+      .order-item-box {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .order-item-box {
+    border-bottom: $border-primary;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+
+    @include media-breakpoint-down(xs) {
+      .dropdown-confirm {
+        .btn-group {
+          width: 100%;
+
+          .nav-link {
+            width: 100%;
+            text-align: center;
+          }
+        }
+      }
+    }
+
+    @include media-breakpoint-up(md) {
+      .box {
+        width: 50%;
+      }
+    }
+
+    .dropdown-confirm {
+      &.admin {
+        .dropdown-menu {
+          min-width: 150px;
+        }
+      }
+    }
+
+    .item-details {
+      max-width: 200px;
+    }
+
+    .item-image {
+      width: 80px;
+      border-radius: $border-radius-default;
+    }
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .price {
+    font-size: $font-size-medium;
+  }
+}
+
+/* end order items styles */
+
+/* start order summary styles */
+.order-summary {
+  border: $border-primary;
+
+  h2 {
+    border-bottom: $border-primary;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+}
+
+/* end order summary styles */
+
+.order-status {
+  color: $default-color !important;
+}
+
+/* start order common styles */
+.order-label {
+  font-weight: $font-weight-medium;
+  color: $font-custom-color;
+}
+
+/* end order common styles */
