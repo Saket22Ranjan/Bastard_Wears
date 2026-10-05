@@ -133,5 +133,6 @@ It is scalable, secure, and capable of supporting real-world deployment.
 ## 📞 Contact
 
 Developer: Saket Ranjan
+Email- shaketranjan84@gmail.com
 GitHub: https://github.com/Saket22Ranjan  
 Project Repo: https://github.com/Saket22Ranjan/Bastard_Wears
